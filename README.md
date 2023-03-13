@@ -1,12 +1,12 @@
 ﻿# DNS
 
-A DNS library written in C# targeting .NET Standard 2.0. Versions prior to version two (2.0.0) were written for .NET 4 using blocking network operations. Version two and above use asynchronous operations.
+A DNS library written in C# targeting .NET Standard 2.0.
 
-Available through NuGet.
+Only original repo is currently available through NuGet.
 
 	Install-Package DNS
 
-[![Test](https://github.com/kapetan/dns/actions/workflows/test.yml/badge.svg)](https://github.com/kapetan/dns/actions/workflows/test.yml)
+[![Test](https://github.com/jgilm/dns/actions/workflows/test.yml/badge.svg)](https://github.com/jgilm/dns/actions/workflows/test.yml)
 
 # Usage
 
@@ -99,7 +99,7 @@ It's also possible to modify the `request` instance in the `server.Requested` ca
 
 ### Request Resolver
 
-The `DnsServer`, `DnsClient` and `ClientRequest` classes also accept an instance implementing the `IRequestResolver` interface, which they internally use to resolve DNS requests. Some of the default implementations are `UdpRequestResolver`, `TcpRequestResolver` and `MasterFile` classes. But it's also possible to provide a custom request resolver.
+The `DnsServer`, `DnsClient` and `ClientRequest` classes also accept an instance implementing the `IRequestResolver` interface, which they internally use to resolve DNS requests. Some of the default implementations are `UdpRequestResolver`, `TcpRequestResolver`, `HttpsRequestResolver` and `MasterFile` classes. But it's also possible to provide a custom request resolver.
 
 ```C#
 // A request resolver that resolves all dns queries to localhost
@@ -123,4 +123,18 @@ public class LocalRequestResolver : IRequestResolver {
 DnsServer server = new DnsServer(new LocalRequestResolver());
 
 await server.Listen();
+```
+
+### Support Dns Over Https
+
+DNS over HTTPS (DoH), DNS queries and responses are encrypted and sent via the HTTP or HTTP/2 protocols. DoH ensures that attackers cannot forge or alter DNS traffic. DoH uses port 443, which is the standard HTTPS traffic port, to wrap the DNS query in an HTTPS request. DNS queries and responses are camouflaged within other HTTPS traffic, since it all comes and goes from the same port.
+
+[https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/](https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/)
+
+```C#
+// DoH Proxy Server
+MasterFile masterFile = new MasterFile();
+DnsServer server = new DnsServer(masterFile, new Uri("https://1.1.1.1/dns-query"));
+// DoH Client
+DnsClient client = new DnsClient(new Uri("https://1.1.1.1/dns-query"))
 ```
